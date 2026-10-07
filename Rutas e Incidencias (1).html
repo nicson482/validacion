@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f6feb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Rutas e Incidencias</title>
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#667085;--bd:#e2e5ea;--pri:#1f6feb;--priTx:#fff;
+  --ok:#157f3b;--okBg:#e3f6e9;--warn:#9a5b00;--warnBg:#fff1d6;--bad:#b42318;--badBg:#fde7e5;--info:#175cd3;--infoBg:#e4eefc;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151a;--card:#1b2027;--tx:#e8ebf0;--mut:#9aa4b2;--bd:#2c333d;--pri:#4c8dff;--priTx:#0b1220;
+  --ok:#6fd58f;--okBg:#143323;--warn:#f2b45a;--warnBg:#3a2a0c;--bad:#ff8f84;--badBg:#3d1814;--info:#8ab4ff;--infoBg:#14264a;}}
+:root[data-theme="dark"]{--bg:#12151a;--card:#1b2027;--tx:#e8ebf0;--mut:#9aa4b2;--bd:#2c333d;--pri:#4c8dff;--priTx:#0b1220;
+  --ok:#6fd58f;--okBg:#143323;--warn:#f2b45a;--warnBg:#3a2a0c;--bad:#ff8f84;--badBg:#3d1814;--info:#8ab4ff;--infoBg:#14264a;}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+h1{font-size:19px;margin:0}h2{font-size:16px;margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1 1 180px}
+label{display:block;font-size:13px;color:var(--mut);margin:8px 0 3px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+textarea{min-height:64px;resize:vertical}
+button{font:inherit;padding:8px 13px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer}
+button.pri{background:var(--pri);color:var(--priTx);border-color:var(--pri)}
+button.bad{color:var(--bad)}button.sm{padding:4px 9px;font-size:13px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button.on{background:var(--pri);color:var(--priTx);border-color:var(--pri)}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600}
+.b-pendiente{background:var(--warnBg);color:var(--warn)}.b-seguimiento{background:var(--infoBg);color:var(--info)}
+.b-validada{background:var(--okBg);color:var(--ok)}.b-rechazada{background:var(--badBg);color:var(--bad)}
+.chip{display:inline-block;padding:1px 8px;border:1px solid var(--bd);border-radius:99px;font-size:12px;color:var(--mut);margin:0 4px 4px 0}
+.mut{color:var(--mut)}.small{font-size:13px}
+.checks{display:flex;gap:8px;flex-wrap:wrap}
+.checks label{display:flex;align-items:center;gap:6px;margin:0;color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:6px 10px;width:auto}
+.checks input{width:auto}
+.notice{background:var(--okBg);color:var(--ok);border-radius:10px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.notice.bad{background:var(--badBg);color:var(--bad)}
+.inc{border-top:1px solid var(--bd);padding:12px 0}.inc:first-child{border-top:0}
+.inc img{max-width:160px;max-height:120px;border-radius:8px;border:1px solid var(--bd);cursor:pointer;margin-top:6px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 6px;border-top:1px solid var(--bd);vertical-align:top}
+th{font-size:12px;color:var(--mut);border-top:0}
+.tblw{overflow-x:auto}
+.banner{font-size:12px;color:var(--mut);margin-top:10px}
+.err{color:var(--bad);font-size:13px;margin-top:6px}
+#viewer{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+#viewer img{max-width:100%;max-height:100%;border-radius:8px}
+.dot{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:99px;background:var(--bad);color:#fff;font-size:11px;line-height:18px;text-align:center}
+input,select,textarea,button{font-size:16px}
+button{min-height:40px}button.sm{min-height:34px;font-size:14px}
+@media (max-width:640px){
+  .wrap{padding:12px 12px 90px}
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:5;background:var(--card);border-top:1px solid var(--bd);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));gap:8px;flex-wrap:nowrap}
+  nav.tabs button{flex:1;min-height:46px}
+  .row>*{flex:1 1 100%}
+  .inc img{max-width:100%;max-height:220px}
+  .tblw table,.tblw thead,.tblw tbody,.tblw tr,.tblw td{display:block}
+  .tblw thead{display:none}
+  .tblw tr{border-top:1px solid var(--bd);padding:8px 0}
+  .tblw td{border:0;padding:3px 0}
+}
+</style>
+</head>
+<body>
+<div class="wrap"><div id="app">Cargando…</div></div>
+<div id="viewer"><img alt=""></div>
+
+<script>
+const REGIONES=["Cobán","Salamá","Petén","Poptún","Morales"];
+const TIPOS=["El cliente rechazó el pedido","No se pudo contactar al cliente","Otra incidencia"];
+const ESTADOS={pendiente:"Pendiente",seguimiento:"En seguimiento",validada:"Aprobada",rechazada:"Rechazada"};
+const state={users:[],incidents:[],ready:false,me:null,tab:null,editing:null,filt:{estado:"",region:""},msg:"",err:""};
+let db=null,useLocal=false,dirty=false;
+let seen=new Set(),base=false,audio=null;
+function unlockAudio(){try{if(!audio){const C=window.AudioContext||window.webkitAudioContext;if(C)audio=new C()}if(audio&&audio.state==="suspended")audio.resume()}catch(e){}}
+function beep(){try{if(!audio)return;[0,.18].forEach((d,k)=>{const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=k?1040:780;g.gain.value=.15;o.connect(g);g.connect(audio.destination);o.start(audio.currentTime+d);o.stop(audio.currentTime+d+.14)})}catch(e){}}
+/* Avisos pendientes: validador = incidencias nuevas asignadas; piloto = incidencias ya validadas/rechazadas */
+function pendientesAviso(me){
+  if(!me)return [];
+  if(me.rol==="validador")return state.incidents.filter(i=>i.asignadoA===me.id&&i.vistoValidador===false&&["pendiente","seguimiento"].includes(i.estado));
+  if(me.rol==="piloto")return state.incidents.filter(i=>i.pilotoId===me.id&&["validada","rechazada"].includes(i.estado)&&!i.vistoPiloto);
+  return [];
+}
+function notifyCheck(){
+  const me=user(state.me);
+  if(!me){base=false;seen=new Set();return}
+  const key=i=>i.id+":"+i.estado+":"+(i.asignadoA||"");
+  const list=pendientesAviso(me),fresh=list.filter(i=>!seen.has(key(i)));
+  list.forEach(i=>seen.add(key(i)));
+  if(!base){base=true;return}
+  if(!fresh.length)return;
+  const i=fresh[0];
+  const txt=me.rol==="validador"?"Nueva incidencia asignada: pedido "+i.pedido+" ("+i.region+")":(i.estado==="validada"?"Aprobada":"Rechazada")+": tu constancia del pedido "+i.pedido;
+  beep();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+  try{if("Notification" in window&&Notification.permission==="granted")new Notification("Rutas e Incidencias",{body:txt})}catch(e){}
+}
+
+/* ---------- utilidades ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
+async function hash(s){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("rutas:"+s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){return "p:"+s}}
+const fmt=t=>t?new Date(t).toLocaleString("es-GT",{dateStyle:"short",timeStyle:"short"}):"";
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);v===null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v)}catch(e){return null}}
+
+/* ---------- almacenamiento (db compartida o local) ---------- */
+function lsLoad(){try{const d=JSON.parse(localStorage.getItem("rutas_demo")||"{}");state.users=d.users||[];state.incidents=d.incidents||[]}catch(e){}}
+function lsSave(){try{localStorage.setItem("rutas_demo",JSON.stringify({users:state.users,incidents:state.incidents}))}catch(e){}}
+async function put(col,obj){
+  if(db){try{await db.collection(col).doc(obj.id).set(obj)}catch(e){state.err="No se pudo guardar: "+(e.message||e.code);render();}}
+  else{const arr=state[col==="users"?"users":"incidents"];const i=arr.findIndex(x=>x.id===obj.id);i>=0?arr[i]=obj:arr.push(obj);lsSave();render()}
+}
+async function del(col,id){
+  if(db){try{await db.collection(col).doc(id).delete()}catch(e){state.err="No se pudo borrar: "+(e.message||e.code);render()}}
+  else{const k=col==="users"?"users":"incidents";state[k]=state[k].filter(x=>x.id!==id);lsSave();render()}
+}
+async function init(){
+  let ns=null;
+  try{if(window.claude&&claude.use)ns=await claude.use("db")}catch(e){}
+  if(ns){
+    db=ns;let n=0;
+    const ready=()=>{if(++n>=2){state.ready=true;restore();render()}};
+    const sub=(col,key)=>db.collection(col).onSnapshot(s=>{
+      state[key]=s.docs.map(d=>({...d.data(),id:d.id}));
+      if(state.ready)softRender();else ready();
+    },e=>{state.err="No se pudo leer la base de datos ("+(e.code||"error")+")";state.ready=true;render()});
+    sub("users","users");sub("incidents","incidents");
+  }else{useLocal=true;lsLoad();state.ready=true;restore();render()}
+}
+function restore(){const id=ss("rutas_me");if(id){const u=state.users.find(x=>x.id===id);if(u&&u.activo!==false)state.me=u.id}}
+function softRender(){notifyCheck();const a=document.activeElement;if(a&&$("#app").contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)){dirty=true;return}render()}
+document.addEventListener("focusout",()=>setTimeout(()=>{if(dirty&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||"")){dirty=false;render()}},50));
+
+/* ---------- lógica de asignación ---------- */
+const abiertas=id=>state.incidents.filter(i=>i.asignadoA===id&&["pendiente","seguimiento"].includes(i.estado)).length;
+function validadoresDe(region){return state.users.filter(u=>u.rol==="validador"&&u.activo!==false&&(u.regiones||[]).includes(region))}
+function elegirValidador(region){
+  const vs=validadoresDe(region);if(!vs.length)return null;
+  vs.sort((a,b)=>abiertas(a.id)-abiertas(b.id)||a.nombre.localeCompare(b.nombre));return vs[0].id;
+}
+/* Reasigna incidencias abiertas cuyo validador ya no cubre la región (o que están sin asignar) */
+async function reconciliar(){
+  for(const inc of state.incidents){
+    if(!["pendiente","seguimiento"].includes(inc.estado))continue;
+    const a=state.users.find(u=>u.id===inc.asignadoA);
+    const ok=a&&a.rol==="validador"&&a.activo!==false&&(a.regiones||[]).includes(inc.region);
+    if(ok)continue;
+    const nuevo=elegirValidador(inc.region);
+    if(nuevo!==inc.asignadoA){inc.asignadoA=nuevo;if(inc.estado==="seguimiento"&&!nuevo)inc.estado="pendiente";await put("incidents",{...inc,asignadoA:nuevo,estado:inc.estado,vistoValidador:false})}
+  }
+}
+const user=id=>state.users.find(u=>u.id===id);
+const nom=id=>user(id)?.nombre||"—";
+
+/* ---------- render ---------- */
+function render(){
+  dirty=false;const app=$("#app");
+  if(!state.ready){app.textContent="Cargando…";return}
+  notifyCheck();
+  const me=user(state.me);
+  if(!me){app.innerHTML=loginView();return}
+  const tabs=me.rol==="admin"?[["usuarios","Usuarios"],["incidencias","Incidencias"]]:me.rol==="validador"?[["cola","Mis incidencias"]]:[["nueva","Reportar"],["mias","Mis reportes"]];
+  if(!state.tab||!tabs.find(t=>t[0]===state.tab))state.tab=tabs[0][0];
+  let body="";
+  if(me.rol==="admin")body=state.tab==="usuarios"?adminUsers():adminIncs();
+  else if(me.rol==="validador")body=validatorView(me);
+  else body=state.tab==="nueva"?pilotForm(me):pilotList(me);
+  const nv=me.rol==="validador"?pendientesAviso(me):[];
+  const notifs=me.rol==="piloto"?state.incidents.filter(i=>i.pilotoId===me.id&&["validada","rechazada"].includes(i.estado)&&!i.vistoPiloto):[];
+  const nAv=pendientesAviso(me).length;
+  document.title=(nAv?"("+nAv+") ":"")+"Rutas e Incidencias";
+  const canNotif=me.rol!=="admin"&&("Notification" in window)&&Notification.permission==="default";
+  app.innerHTML=`
+  <header class="top"><div><h1>Rutas e Incidencias</h1><div class="small mut">${esc(me.nombre)} · ${esc(me.rol)}${me.rol!=="admin"?" · "+(me.regiones||[]).map(esc).join(", "):""}</div></div>
+  <div style="display:flex;gap:8px;flex:0 0 auto">${canNotif?'<button data-act="enablenotif">🔔 Activar avisos</button>':""}<button data-act="logout">Salir</button></div></header>
+  ${useLocal?`<div class="notice bad">Modo local de prueba: los datos solo se guardan en este navegador.</div>`:""}
+  ${state.err?`<div class="notice bad"><span>${esc(state.err)}</span><button class="sm" data-act="clearerr">OK</button></div>`:""}
+  ${state.msg?`<div class="notice"><span>${esc(state.msg)}</span><button class="sm" data-act="clearmsg">OK</button></div>`:""}
+  ${nv.map(i=>`<div class="notice"><span>🔔 Nueva incidencia asignada: pedido <b>${esc(i.pedido)}</b> (${esc(i.region)}) · Piloto: ${esc(nom(i.pilotoId))}</span><button class="sm" data-act="vistoval" data-id="${i.id}">Entendido</button></div>`).join("")}
+  ${notifs.map(i=>`<div class="notice ${i.estado==="rechazada"?"bad":""}"><span>${i.estado==="validada"?"✓ Se aprobó tu constancia del pedido":"✗ Se rechazó tu constancia del pedido"} <b>${esc(i.pedido)}</b>${i.comentario?" — "+esc(i.comentario):""}</span><button class="sm" data-act="visto" data-id="${i.id}">Entendido</button></div>`).join("")}
+  <nav class="tabs">${tabs.map(t=>`<button data-act="tab" data-t="${t[0]}" class="${state.tab===t[0]?"on":""}">${t[1]}${(t[0]==="cola"&&nv.length)||(t[0]==="mias"&&notifs.length)?`<span class="dot">${t[0]==="cola"?nv.length:notifs.length}</span>`:""}</button>`).join("")}</nav>
+  ${body}`;
+}
+
+function loginView(){
+  const primera=state.users.length===0;
+  return `<div class="card" style="max-width:380px;margin:40px auto"><h2>${primera?"Crear administrador":"Iniciar sesión"}</h2>
+  ${primera?`<p class="small mut">Aún no hay usuarios. Crea la cuenta del administrador para empezar.</p><label>Nombre</label><input id="l_nom">`:""}
+  <label>Usuario</label><input id="l_u" autocapitalize="off" autocomplete="username">
+  <label>PIN / contraseña</label><input id="l_p" type="password" autocomplete="current-password">
+  <div class="err">${esc(state.err)}</div>
+  <div style="margin-top:12px"><button class="pri" data-act="${primera?"setup":"login"}">${primera?"Crear y entrar":"Entrar"}</button></div></div>`;
+}
+
+function regionChecks(sel){return `<div class="checks">${REGIONES.map(r=>`<label><input type="checkbox" name="reg" value="${r}" ${sel.includes(r)?"checked":""}>${r}</label>`).join("")}</div>`}
+
+function adminUsers(){
+  const e=state.editing,u=e==="new"?{rol:"piloto",regiones:[],activo:true}:user(e);
+  const form=e?`<div class="card"><h2>${e==="new"?"Nuevo usuario":"Editar usuario"}</h2>
+   <div class="row"><div><label>Nombre</label><input id="f_nom" value="${esc(u.nombre||"")}"></div>
+   <div><label>Usuario</label><input id="f_usr" value="${esc(u.usuario||"")}" autocapitalize="off"></div>
+   <div><label>${e==="new"?"PIN / contraseña":"Nuevo PIN (vacío = no cambiar)"}</label><input id="f_pin" type="password"></div>
+   <div><label>Rol</label><select id="f_rol" data-act="rolchg"><option value="piloto" ${u.rol==="piloto"?"selected":""}>Piloto</option><option value="validador" ${u.rol==="validador"?"selected":""}>Validador</option><option value="admin" ${u.rol==="admin"?"selected":""}>Administrador</option></select></div></div>
+   <label>Regiones a cargo</label>${regionChecks(u.regiones||[])}
+   <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="f_act" style="width:auto" ${u.activo!==false?"checked":""}> Usuario activo</label>
+   <div class="err">${esc(state.err)}</div>
+   <div style="margin-top:12px;display:flex;gap:8px"><button class="pri" data-act="saveuser">Guardar</button><button data-act="canceledit">Cancelar</button></div></div>`:"";
+  const rows=state.users.slice().sort((a,b)=>a.rol.localeCompare(b.rol)||a.nombre.localeCompare(b.nombre)).map(x=>`<tr>
+   <td><b>${esc(x.nombre)}</b><div class="small mut">@${esc(x.usuario)}${x.activo===false?" · inactivo":""}</div></td>
+   <td>${esc(x.rol)}</td><td>${x.rol==="admin"?'<span class="mut">todas</span>':(x.regiones||[]).map(r=>`<span class="chip">${esc(r)}</span>`).join("")||'<span class="mut">sin región</span>'}</td>
+   <td style="white-space:nowrap"><button class="sm" data-act="edituser" data-id="${x.id}">Editar</button> <button class="sm bad" data-act="deluser" data-id="${x.id}">Borrar</button></td></tr>`).join("");
+  return `${form}<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="margin:0">Usuarios</h2><button class="pri" data-act="newuser">+ Agregar</button></div>
+  <div class="tblw"><table><thead><tr><th>Usuario</th><th>Rol</th><th>Regiones</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p class="banner">Al cambiar las regiones de un validador, las incidencias abiertas se reasignan solas al validador que cubra esa región.</p></div>`;
+}
+
+function filtros(){
+  return `<div class="row" style="margin-bottom:8px"><div><label>Estado</label><select data-act="filt" data-k="estado"><option value="">Todos</option>${Object.entries(ESTADOS).map(([k,v])=>`<option value="${k}" ${state.filt.estado===k?"selected":""}>${v}</option>`).join("")}</select></div>
+  <div><label>Región</label><select data-act="filt" data-k="region"><option value="">Todas</option>${REGIONES.map(r=>`<option ${state.filt.region===r?"selected":""}>${r}</option>`).join("")}</select></div></div>`;
+}
+const pasaFiltro=i=>(!state.filt.estado||i.estado===state.filt.estado)&&(!state.filt.region||i.region===state.filt.region);
+
+function incBody(i,showPiloto=true){
+  return `<div><b>Pedido ${esc(i.pedido)}</b> <span class="badge b-${i.estado}">${ESTADOS[i.estado]}</span> <span class="chip">${esc(i.region)}</span></div>
+  <div class="small mut">${esc(i.tipo)} · ${fmt(i.creado)}${showPiloto?" · Piloto: "+esc(nom(i.pilotoId)):""}</div>
+  <div class="small">Ref. en la otra plataforma: <b>${esc(i.referencia)}</b></div>
+  ${i.nota?`<div class="small">${esc(i.nota)}</div>`:""}
+  ${i.imagen?`<div><img src="${i.imagen}" data-act="zoom" alt="Constancia"></div>`:""}
+  ${i.comentario?`<div class="small mut">Comentario del validador: ${esc(i.comentario)}</div>`:""}`;
+}
+
+function adminIncs(){
+  const list=state.incidents.filter(pasaFiltro).sort((a,b)=>b.creado-a.creado);
+  const sin=state.incidents.filter(i=>!i.asignadoA&&["pendiente","seguimiento"].includes(i.estado)).length;
+  return `<div class="card"><h2>Incidencias (${list.length})</h2>${sin?`<div class="notice bad">${sin} sin validador asignado: falta un validador activo en esa región.</div>`:""}${filtros()}
+  ${list.map(i=>`<div class="inc">${incBody(i)}
+   <div style="margin-top:6px" class="small">Asignada a: <select data-act="reasignar" data-id="${i.id}" style="width:auto;display:inline-block"><option value="">Sin asignar</option>${state.users.filter(u=>u.rol==="validador"&&u.activo!==false).map(u=>`<option value="${u.id}" ${i.asignadoA===u.id?"selected":""}>${esc(u.nombre)}${(u.regiones||[]).includes(i.region)?"":" (otra región)"}</option>`).join("")}</select></div></div>`).join("")||'<p class="mut">No hay incidencias.</p>'}</div>`;
+}
+
+function pilotForm(me){
+  const regs=me.regiones||[];
+  if(!regs.length)return `<div class="card"><p>No tienes una región asignada. Pide al administrador que te asigne una.</p></div>`;
+  return `<div class="card"><h2>Reportar incidencia subida a la otra plataforma</h2>
+  <div class="row"><div><label>Código de pedido</label><input id="p_ped"></div>
+  <div><label>Región</label><select id="p_reg">${regs.map(r=>`<option>${r}</option>`).join("")}</select></div></div>
+  <div class="row"><div><label>No. / enlace de la incidencia en la otra plataforma</label><input id="p_ref"></div>
+  <div><label>Tipo de incidencia</label><select id="p_tipo">${TIPOS.map(t=>`<option>${t}</option>`).join("")}</select></div></div>
+  <label>Nota (opcional)</label><textarea id="p_nota"></textarea>
+  <label>Imagen de constancia (opcional)</label><input type="file" id="p_img" accept="image/*">
+  <div class="err">${esc(state.err)}</div>
+  <div style="margin-top:12px"><button class="pri" data-act="sendinc">Enviar reporte</button></div>
+  <p class="banner">El reporte se asigna automáticamente a un validador de la región seleccionada.</p></div>`;
+}
+function pilotList(me){
+  const list=state.incidents.filter(i=>i.pilotoId===me.id).sort((a,b)=>b.creado-a.creado);
+  return `<div class="card"><h2>Mis reportes (${list.length})</h2>${list.map(i=>`<div class="inc">${incBody(i,false)}<div class="small mut">Validador: ${esc(nom(i.asignadoA))}</div></div>`).join("")||'<p class="mut">Aún no has reportado incidencias.</p>'}</div>`;
+}
+
+function validatorView(me){
+  const mias=state.incidents.filter(i=>i.asignadoA===me.id).filter(pasaFiltro).sort((a,b)=>b.creado-a.creado);
+  const libres=state.incidents.filter(i=>!i.asignadoA&&["pendiente","seguimiento"].includes(i.estado)&&(me.regiones||[]).includes(i.region));
+  return `${libres.length?`<div class="card"><h2>Sin asignar en tus regiones (${libres.length})</h2>${libres.map(i=>`<div class="inc">${incBody(i)}<button class="sm" data-act="tomar" data-id="${i.id}" style="margin-top:6px">Tomar</button></div>`).join("")}</div>`:""}
+  <div class="card"><h2>Asignadas a mí (${mias.length})</h2>${filtros()}
+  ${mias.map(i=>{const abierta=["pendiente","seguimiento"].includes(i.estado);return `<div class="inc">${incBody(i)}
+   ${abierta?`<div style="margin-top:8px"><input id="c_${i.id}" placeholder="Comentario (opcional)"><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+    ${i.estado==="pendiente"?`<button class="sm" data-act="estado" data-e="seguimiento" data-id="${i.id}">Iniciar seguimiento</button>`:""}
+    <button class="sm pri" data-act="estado" data-e="validada" data-id="${i.id}">Aprobar</button>
+    <button class="sm bad" data-act="estado" data-e="rechazada" data-id="${i.id}">Rechazar</button></div></div>`:""}</div>`}).join("")||'<p class="mut">No tienes incidencias.</p>'}</div>`;
+}
+
+/* ---------- acciones ---------- */
+function resizeImg(file){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>{const im=new Image();im.onerror=rej;im.onload=()=>{const m=900,k=Math.min(1,m/Math.max(im.width,im.height));const c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.7))};im.src=r.result};r.readAsDataURL(file)})}
+
+document.addEventListener("click",async ev=>{
+  unlockAudio();
+  const el=ev.target.closest("[data-act]");if(!el)return;const a=el.dataset.act,id=el.dataset.id;
+  if(["rolchg","filt","reasignar"].includes(a))return;
+  state.err="";
+  if(a==="zoom"){$("#viewer img").src=el.src;$("#viewer").style.display="flex";return}
+  if(a==="login"){
+    const u=$("#l_u").value.trim().toLowerCase(),p=await hash($("#l_p").value);
+    const f=state.users.find(x=>x.usuario===u&&x.pin===p&&x.activo!==false);
+    if(!f){state.err="Usuario o PIN incorrecto";render();return}
+    state.me=f.id;ss("rutas_me",f.id);state.tab=null;render();return}
+  if(a==="setup"){
+    const n=$("#l_nom").value.trim(),u=$("#l_u").value.trim().toLowerCase(),p=$("#l_p").value;
+    if(!n||!u||p.length<4){state.err="Completa nombre, usuario y un PIN de al menos 4 caracteres";render();return}
+    const o={id:uid(),nombre:n,usuario:u,pin:await hash(p),rol:"admin",regiones:[],activo:true};
+    await put("users",o);state.users=state.users.some(x=>x.id===o.id)?state.users:[...state.users,o];state.me=o.id;ss("rutas_me",o.id);render();return}
+  if(a==="logout"){state.me=null;ss("rutas_me",null);state.tab=null;render();return}
+  if(a==="tab"){state.tab=el.dataset.t;state.editing=null;render();return}
+  if(a==="clearerr"){render();return}
+  if(a==="clearmsg"){state.msg="";render();return}
+  if(a==="newuser"){state.editing="new";render();return}
+  if(a==="edituser"){state.editing=id;render();return}
+  if(a==="canceledit"){state.editing=null;render();return}
+  if(a==="deluser"){
+    const u=user(id);if(!u)return;
+    if(u.id===state.me){state.err="No puedes borrar tu propio usuario";render();return}
+    if(!confirm("¿Borrar a "+u.nombre+"?"))return;
+    await del("users",id);state.users=state.users.filter(x=>x.id!==id);await reconciliar();render();return}
+  if(a==="saveuser"){
+    const nombre=$("#f_nom").value.trim(),usr=$("#f_usr").value.trim().toLowerCase(),pin=$("#f_pin").value,rol=$("#f_rol").value;
+    const regiones=[...document.querySelectorAll('input[name="reg"]:checked')].map(x=>x.value);
+    const activo=$("#f_act").checked,nuevo=state.editing==="new",prev=nuevo?null:user(state.editing);
+    if(!nombre||!usr){state.err="Nombre y usuario son obligatorios";render();return}
+    if(state.users.some(x=>x.usuario===usr&&x.id!==prev?.id)){state.err="Ese usuario ya existe";render();return}
+    if(nuevo&&pin.length<4){state.err="El PIN debe tener al menos 4 caracteres";render();return}
+    if(rol!=="admin"&&!regiones.length){state.err="Asigna al menos una región";render();return}
+    const o={id:prev?.id||uid(),nombre,usuario:usr,rol,regiones:rol==="admin"?[]:regiones,activo,pin:pin?await hash(pin):prev.pin};
+    await put("users",o);
+    const k=state.users.findIndex(x=>x.id===o.id);k>=0?state.users[k]=o:state.users.push(o);
+    await reconciliar();state.editing=null;state.msg="Usuario guardado";render();return}
+  if(a==="sendinc"){
+    const me=user(state.me),ped=$("#p_ped").value.trim(),ref=$("#p_ref").value.trim();
+    if(!ped||!ref){state.err="Código de pedido y referencia de la otra plataforma son obligatorios";render();return}
+    let img=null;const f=$("#p_img").files[0];
+    if(f){try{img=await resizeImg(f)}catch(e){state.err="No se pudo leer la imagen";render();return}}
+    const region=$("#p_reg").value;
+    await put("incidents",{id:uid(),pedido:ped,referencia:ref,region,tipo:$("#p_tipo").value,nota:$("#p_nota").value.trim(),imagen:img,
+      pilotoId:me.id,asignadoA:elegirValidador(region),estado:"pendiente",comentario:"",vistoPiloto:false,vistoValidador:false,creado:Date.now()});
+    state.msg="Reporte enviado y asignado automáticamente";state.tab="mias";render();return}
+  if(a==="enablenotif"){try{const r=await Notification.requestPermission();state.msg=r==="granted"?"Avisos activados mientras la app esté abierta.":"El navegador no permitió avisos del sistema; igual verás alertas y sonido dentro de la app."}catch(e){state.msg="Este navegador no permite avisos del sistema; verás alertas y sonido dentro de la app."}render();return}
+  if(a==="vistoval"){const i=state.incidents.find(x=>x.id===id);if(i)await put("incidents",{...i,vistoValidador:true});return}
+  if(a==="visto"){const i=state.incidents.find(x=>x.id===id);if(i)await put("incidents",{...i,vistoPiloto:true});return}
+  if(a==="tomar"){const i=state.incidents.find(x=>x.id===id);if(i)await put("incidents",{...i,asignadoA:state.me,vistoValidador:true});return}
+  if(a==="estado"){
+    const i=state.incidents.find(x=>x.id===id);if(!i)return;
+    const c=document.getElementById("c_"+id)?.value.trim()||"";
+    await put("incidents",{...i,estado:el.dataset.e,vistoValidador:true,comentario:c||i.comentario,vistoPiloto:["validada","rechazada"].includes(el.dataset.e)?false:i.vistoPiloto,resuelto:["validada","rechazada"].includes(el.dataset.e)?Date.now():null});return}
+});
+document.addEventListener("change",async ev=>{
+  const el=ev.target.closest("[data-act]");if(!el)return;
+  if(el.dataset.act==="filt"){state.filt[el.dataset.k]=el.value;render()}
+  if(el.dataset.act==="reasignar"){const i=state.incidents.find(x=>x.id===el.dataset.id);if(i)await put("incidents",{...i,asignadoA:el.value||null,vistoValidador:false})}
+});
+$("#viewer").addEventListener("click",()=>{$("#viewer").style.display="none"});
+init();
+</script>
+</body>
+</html>
